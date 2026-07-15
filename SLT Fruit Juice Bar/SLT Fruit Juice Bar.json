@@ -1,0 +1,747 @@
+[
+    {
+        "id": "3cb663c73b63886c",
+        "type": "tab",
+        "label": "SLT Fruit Juice Bar (Vishwa and Avishka)",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a7e2104ad67730f8",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Active Power",
+        "topic": "ActivePower",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "15",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 510,
+        "y": 760,
+        "wires": [
+            [
+                "1cdae6bed6b27fd3"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "c0045f5a7df07c02",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Reactive Power",
+        "topic": "ReactivePower",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "17",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 500,
+        "y": 680,
+        "wires": [
+            [
+                "89545b8b43877c3f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3d383babf761ec19",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Apparent Power",
+        "topic": "ApparentPower",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "19",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 520,
+        "y": 400,
+        "wires": [
+            [
+                "897e1ef09cbeab6a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a255efd70d0a9606",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Voltage L-N",
+        "topic": "VoltageLN",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "",
+        "dataType": "InputRegister",
+        "adr": "21",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 510,
+        "y": 480,
+        "wires": [
+            [
+                "bec79b229b2f2011"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "1965830b7fbdd5c4",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Current",
+        "topic": "Current",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "23",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 510,
+        "y": 600,
+        "wires": [
+            [
+                "a581a1078a607791"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "52ea4f3f5b7d52b2",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Power Factor",
+        "topic": "PowerFactor",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "25",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 510,
+        "y": 540,
+        "wires": [
+            [
+                "99741aeed0b1fa9a"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3526e0ca5e23c1de",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Frequency",
+        "topic": "Frequency",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "27",
+        "quantity": 2,
+        "rate": 10,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 520,
+        "y": 340,
+        "wires": [
+            [
+                "cdbcf2a651e7cc7c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "bec79b229b2f2011",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const VoltageL_N = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        Voltage_L_N: VoltageL_N,\n        unit: \"V\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 480,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "89545b8b43877c3f",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const ReactivePower = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        Reactive_Power: ReactivePower,\n        unit: \"KVar\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 680,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "99741aeed0b1fa9a",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const PowerFactor = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        power_factor1: PowerFactor,\n        unit: \"\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 540,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "897e1ef09cbeab6a",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const ApparentPower = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        Apparent_Power: ApparentPower,\n        unit: \"KVA\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 400,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "1cdae6bed6b27fd3",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const ActivePower = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        ActivePower: ActivePower,\n        unit: \"KW\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 760,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "cdbcf2a651e7cc7c",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const Freequency = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        Freequency_: Freequency,\n        unit: \"Hz\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 340,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "a581a1078a607791",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const Current = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        Current_: Current,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 600,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "3b2f45cdd33afcc5",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32 for KWh\n// Assuming big-endian byte order (most common)\n\n// Define the scaling factor and byte order for KWh\nconst KWh_scalingFactor = 1; // Change this if the value needs to be scaled\nconst KWh_isByteSwapNeeded = false; // Set to true if low register comes first\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values for KWh\n    let reg1_KWh = msg.payload[0];\n    let reg2_KWh = msg.payload[1];\n\n    // Check if byte swapping is needed for KWh\n    if (KWh_isByteSwapNeeded) {\n        [reg1_KWh, reg2_KWh] = [reg2_KWh, reg1_KWh]; // Swap the registers\n    }\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1_KWh, 0);\n    buffer.writeUInt16BE(reg2_KWh, 2);\n\n    // Read as big-endian float32 and apply scaling\n    const TotalKWh = buffer.readFloatBE(0) * KWh_scalingFactor;\n\n    msg.payload = {\n        raw_registers: [reg1_KWh, reg2_KWh],\n        Total_KWh: TotalKWh,\n        unit: \"Units\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received for KWh\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 940,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "1b6c595739e4645b",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Parse Float32",
+        "func": "// Convert 2 registers to float32 for Kvarh\n// Assuming big-endian byte order (most common)\n\n// Define the scaling factor and byte order for Kvarh\nconst Kvarh_scalingFactor = 1; // Change this if the value needs to be scaled\nconst Kvarh_isByteSwapNeeded = false; // Set to true if low register comes first\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values for Kvarh\n    let reg1_Kvarh = msg.payload[0];\n    let reg2_Kvarh = msg.payload[1];\n\n    // Check if byte swapping is needed for Kvarh\n    if (Kvarh_isByteSwapNeeded) {\n        [reg1_Kvarh, reg2_Kvarh] = [reg2_Kvarh, reg1_Kvarh]; // Swap the registers\n    }\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1_Kvarh, 0);\n    buffer.writeUInt16BE(reg2_Kvarh, 2);\n    \n    // Read as big-endian float32 and apply scaling\n    const TotalKvarh = buffer.readFloatBE(0) * Kvarh_scalingFactor;\n    \n    msg.payload = {\n        raw_registers: [reg1_Kvarh, reg2_Kvarh],\n        Total_Kvarh: TotalKvarh,\n        unit: \"Units\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received for Kvarh\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 840,
+        "wires": [
+            [
+                "f635cac87cfad0d4"
+            ]
+        ]
+    },
+    {
+        "id": "dac8eba9fa207381",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Total Active Energy(30000)",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "01",
+        "quantity": "2",
+        "rate": "10",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 530,
+        "y": 920,
+        "wires": [
+            [
+                "3b2f45cdd33afcc5"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "55d9f6066d8e7a34",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Total Reactive Energy(30006)",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "07",
+        "quantity": "2",
+        "rate": "10",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 540,
+        "y": 840,
+        "wires": [
+            [
+                "1b6c595739e4645b"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "ef7a734e1f030d08",
+        "type": "comment",
+        "z": "3cb663c73b63886c",
+        "name": "Apparent Power use at the moment (KVa)",
+        "info": "",
+        "x": 240,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "ebab1e1297e62a4e",
+        "type": "comment",
+        "z": "3cb663c73b63886c",
+        "name": "Reactive Power use at the moment (KVar)",
+        "info": "",
+        "x": 240,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "bfa3f059e15ce115",
+        "type": "comment",
+        "z": "3cb663c73b63886c",
+        "name": "Active Power use at the moment (Kw)",
+        "info": "",
+        "x": 250,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "6364c7f20b422af8",
+        "type": "comment",
+        "z": "3cb663c73b63886c",
+        "name": "Total Active Power used overtime (KWh)",
+        "info": "",
+        "x": 230,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "9ba16210bcce207a",
+        "type": "comment",
+        "z": "3cb663c73b63886c",
+        "name": "Total Reactive Power used overtime (Kvarh)",
+        "info": "",
+        "x": 170,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "f635cac87cfad0d4",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "name": "Prepare InfluxDB Data",
+        "func": "// Prepare data for InfluxDB - Handle specific required fields only\ntry {\n    const data = msg.payload;\n\n    // Validate input data\n    if (!data || typeof data !== 'object') {\n        node.error(\"Invalid payload - expected object\");\n        return null;\n    }\n\n    // Function to ensure value is a valid number\n    function ensureNumber(value) {\n        if (value === null || value === undefined || value === \"\") return null;\n        if (typeof value === 'number') {\n            return isNaN(value) || !isFinite(value) ? null : Number(value.toFixed(3));\n        }\n        if (typeof value === 'string') {\n            const cleaned = value.replace(/[^0-9.-]/g, '').trim();\n            if (cleaned === '' || cleaned === '-' || cleaned === '.') return null;\n            const num = parseFloat(cleaned);\n            return isNaN(num) || !isFinite(num) ? null : Number(num.toFixed(3));\n        }\n        return null;\n    }\n\n    // Create fields object for specific required values only\n    const fields = {};\n\n    // Required fields mapping (based on your Parse Float32 nodes)\n    const requiredFields = {\n        \"Voltage_L_N\": data.Voltage_L_N,\n        \"Current_\": data.Current_,\n        \"ActivePower\": data.ActivePower,\n        \"Reactive_Power\": data.Reactive_Power,\n        \"Apparent_Power\": data.Apparent_Power,\n        \"power_factor1\": data.power_factor1,\n        \"Freequency_\": data.Freequency_,\n        \"Total_KWh\": data.Total_KWh,\n        \"Total_Kvarh\": data.Total_Kvarh\n    };\n\n    // Process only the required fields\n    for (const [fieldName, value] of Object.entries(requiredFields)) {\n        if (value !== undefined && value !== null) {\n            const processedValue = ensureNumber(value);\n            if (processedValue !== null) {\n                fields[fieldName] = processedValue;\n            }\n        }\n    }\n\n    // Check if we have at least one valid field\n    if (Object.keys(fields).length === 0) {\n        node.warn(\"No valid required fields found. Available data fields: \" +\n            Object.keys(data).filter(key => !['raw_registers', 'unit', 'timestamp'].includes(key)).join(', '));\n        return null;\n    }\n\n    // Create InfluxDB format with only required fields\n    msg.payload = {\n        ...fields,\n        device: \"SLT Juice\",\n        location: \"Bar\"\n    };\n\n    node.log(`Sending ${Object.keys(fields).length} required parameters to InfluxDB: ${Object.keys(fields).join(', ')}`);\n\n    return msg;\n\n} catch (error) {\n    node.error(\"Error preparing InfluxDB data: \" + error.message);\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 640,
+        "wires": [
+            [
+                "817d141aecbc65f8"
+            ]
+        ]
+    },
+    {
+        "id": "817d141aecbc65f8",
+        "type": "influxdb out",
+        "z": "3cb663c73b63886c",
+        "d": true,
+        "influxdb": "9352a141e02f942c",
+        "name": "SLT Fruit Juice Bar",
+        "measurement": "SLT Juice_Bar",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "SLT",
+        "bucket": "SLT Canteens",
+        "x": 1530,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "3c716b419a101822",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "name": "Prepare InfluxDB Data",
+        "func": "// Prepare data for InfluxDB - Handle specific required fields only\ntry {\n    const data = msg.payload;\n\n    // Validate input data\n    if (!data || typeof data !== 'object') {\n        node.error(\"Invalid payload - expected object\");\n        return null;\n    }\n\n    // Function to ensure value is a valid number\n    function ensureNumber(value) {\n        if (value === null || value === undefined || value === \"\") return null;\n        if (typeof value === 'number') {\n            return isNaN(value) || !isFinite(value) ? null : Number(value.toFixed(3));\n        }\n        if (typeof value === 'string') {\n            const cleaned = value.replace(/[^0-9.-]/g, '').trim();\n            if (cleaned === '' || cleaned === '-' || cleaned === '.') return null;\n            const num = parseFloat(cleaned);\n            return isNaN(num) || !isFinite(num) ? null : Number(num.toFixed(3));\n        }\n        return null;\n    }\n\n    // Create fields object for specific required values only\n    const fields = {};\n\n    // Required fields mapping (based on your Parse Float32 nodes)\n    const requiredFields = {\n        \"Voltage_L_N\": data.Voltage_L_N,\n        \"Current_\": data.Current_,\n        \"ActivePower\": data.ActivePower,\n        \"Reactive_Power\": data.Reactive_Power,\n        \"Apparent_Power\": data.Apparent_Power,\n        \"power_factor1\": data.power_factor1,\n        \"Freequency_\": data.Freequency_,\n        \"Total_KWh\": data.Total_KWh,\n        \"Total_Kvarh\": data.Total_Kvarh\n    };\n\n    // Process only the required fields\n    for (const [fieldName, value] of Object.entries(requiredFields)) {\n        if (value !== undefined && value !== null) {\n            const processedValue = ensureNumber(value);\n            if (processedValue !== null) {\n                fields[fieldName] = processedValue;\n            }\n        }\n    }\n\n    // Check if we have at least one valid field\n    if (Object.keys(fields).length === 0) {\n        node.warn(\"No valid required fields found. Available data fields: \" +\n            Object.keys(data).filter(key => !['raw_registers', 'unit', 'timestamp'].includes(key)).join(', '));\n        return null;\n    }\n\n    // Create InfluxDB format with only required fields\n    msg.payload = {\n        ...fields,\n        device: \"SLT Juice\",\n        location: \"Bar\"\n    };\n\n    node.log(`Sending ${Object.keys(fields).length} required parameters to InfluxDB: ${Object.keys(fields).join(', ')}`);\n\n    return msg;\n\n} catch (error) {\n    node.error(\"Error preparing InfluxDB data: \" + error.message);\n    return null;\n}\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 1120,
+        "wires": [
+            [
+                "6430a95b1c93f08a",
+                "4daa4746ae55d48a"
+            ]
+        ]
+    },
+    {
+        "id": "6430a95b1c93f08a",
+        "type": "influxdb out",
+        "z": "3cb663c73b63886c",
+        "influxdb": "9352a141e02f942c",
+        "name": "SLT Fruit Juice Bar",
+        "measurement": "SLT Juice_Bar",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "SLT",
+        "bucket": "SLT Canteens",
+        "x": 1030,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "7fc96c2e9a1e58c6",
+        "type": "modbus-read",
+        "z": "3cb663c73b63886c",
+        "name": "Read Fruit Juice Bar Block",
+        "topic": "JuiceBarBlock",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "unitid": "2",
+        "dataType": "InputRegister",
+        "adr": "1",
+        "quantity": 28,
+        "rate": 5,
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "server": "71c015983faf1a1c",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 210,
+        "y": 1120,
+        "wires": [
+            [
+                "1aa29182e8dfe004"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "1aa29182e8dfe004",
+        "type": "function",
+        "z": "3cb663c73b63886c",
+        "name": "Parse Fruit Juice Bar Block",
+        "func": "// Parse all float32 parameters from 28-register block\nconst regs = msg.payload;\n\nfunction readFloat(regs, startIndex) {\n    if (!regs || regs.length < startIndex + 2) return null;\n    const reg1 = regs[startIndex];\n    const reg2 = regs[startIndex + 1];\n    const buffer = Buffer.alloc(4);\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    return buffer.readFloatBE(0);\n}\n\nif (!Array.isArray(regs) || regs.length < 28) {\n    node.error(\"Invalid or short payload received: \" + JSON.stringify(regs));\n    return null;\n}\n\nmsg.payload = {\n    Total_KWh:      readFloat(regs, 0),\n    Total_Kvarh:    readFloat(regs, 6),\n    ActivePower:    readFloat(regs, 14),\n    Reactive_Power: readFloat(regs, 16),\n    Apparent_Power: readFloat(regs, 18),\n    Voltage_L_N:    readFloat(regs, 20),\n    Current_:       readFloat(regs, 22),\n    power_factor1:  readFloat(regs, 24),\n    Freequency_:    readFloat(regs, 26),\n    timestamp:      new Date().toISOString()\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 1120,
+        "wires": [
+            [
+                "3c716b419a101822"
+            ]
+        ]
+    },
+    {
+        "id": "4daa4746ae55d48a",
+        "type": "debug",
+        "z": "3cb663c73b63886c",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1020,
+        "y": 1200,
+        "wires": []
+    },
+    {
+        "id": "71c015983faf1a1c",
+        "type": "modbus-client",
+        "name": "Fruit Juice Center",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.1.201",
+        "tcpPort": 502,
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": 9600,
+        "serialDatabits": 8,
+        "serialStopbits": 1,
+        "serialParity": "none",
+        "serialConnectionDelay": 100,
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": 2,
+        "commandDelay": 1,
+        "clientTimeout": 1000,
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": 2000,
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "9352a141e02f942c",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "123",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://124.43.179.232:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "0f302eb6e146499a",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-modbus": "5.44.0",
+            "node-red-contrib-influxdb": "0.7.0"
+        }
+    }
+]

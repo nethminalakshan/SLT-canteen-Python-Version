@@ -1,0 +1,1684 @@
+[
+    {
+        "id": "aebffb594301406b",
+        "type": "tab",
+        "label": "SLT 2nd Floor Canteen (Avishka and Vishwa)",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b04caa2dc3a2ce82",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Prepare InfluxDB Data",
+        "func": "// Prepare data for InfluxDB - Handle specific required fields only\ntry {\n    const data = msg.payload;\n    \n    // Validate input data\n    if (!data || typeof data !== 'object') {\n        node.error(\"Invalid payload - expected object\");\n        return null;\n    }\n    \n    const timestamp = new Date().toISOString();\n\n    // Function to ensure value is a valid number\n    function ensureNumber(value) {\n        if (value === null || value === undefined || value === \"\") return null;\n        if (typeof value === 'number') {\n            return isNaN(value) || !isFinite(value) ? null : Number(value.toFixed(3));\n        }\n        if (typeof value === 'string') {\n            const cleaned = value.replace(/[^0-9.-]/g, '').trim();\n            if (cleaned === '' || cleaned === '-' || cleaned === '.') return null;\n            const num = parseFloat(cleaned);\n            return isNaN(num) || !isFinite(num) ? null : Number(num.toFixed(3));\n        }\n        return null;\n    }\n\n    // Create fields object for specific required values only\n    const fields = {};\n    \n    // Required fields mapping based on your specification\n    const requiredFields = {\n        // Voltage readings\n        'voltage_v1n': data.voltage_v1n,\n        'voltage_v2n': data.voltage_v2n, \n        'voltage_v3n': data.voltage_v3n,\n        'average_voltage_ln': data.average_voltage_ln,\n        \n        // Current readings\n        'current_i1': data.current_i1,\n        'current_i2': data.current_i2,\n        'current_i3': data.current_i3,\n        'average_current': data.average_current,\n        \n        // Power readings (kW)\n        'kw1': data.kw1,\n        'kw2': data.kw2,\n        'kw3': data.kw3,\n        'total_kw': data.total_kw,\n        \n        // Apparent power (kVA)\n        'kva1': data.kva1,\n        'kva2': data.kva2,\n        'kva3': data.kva3,\n        'total_kva': data.total_kva,\n        \n        // Power factor\n        'pf1': data.pf1 || data.power_factor1,\n        'pf2': data.pf2 || data.power_factor2,\n        'pf3': data.pf3 || data.power_factor3,\n        'average_pf': data.average_pf || data.average_power_factor,\n        \n        // Frequency\n        'frequency': data.frequency,\n        \n        // Energy readings\n        'total_net_kwh': data.total_net_kwh,\n        'total_net_kvah': data.total_net_kvah,\n        \n        // Maximum demand readings\n        'max_i1_demand': data.max_i1_demand,\n        'max_i2_demand': data.max_i2_demand,\n        'max_i3_demand': data.max_i3_demand,\n        'max_avg_i_demand': data.max_avg_i_demand\n    };\n    \n    // Process only the required fields\n    for (const [fieldName, value] of Object.entries(requiredFields)) {\n        if (value !== undefined && value !== null) {\n            const processedValue = ensureNumber(value);\n            if (processedValue !== null) {\n                fields[fieldName] = processedValue;\n            }\n        }\n    }\n    \n    // Check if we have at least one valid field\n    if (Object.keys(fields).length === 0) {\n        node.warn(\"No valid required fields found. Available data fields: \" + \n                  Object.keys(data).filter(key => !['raw_registers', 'unit', 'timestamp'].includes(key)).join(', '));\n        return null;\n    }\n\n    // Create InfluxDB format with only required fields\n    msg.payload = {\n        ...fields,\n        device: \"SLT 2nd floor\",\n        location: \"Canteen\"\n    };\n\n    node.log(`Sending ${Object.keys(fields).length} required parameters to InfluxDB: ${Object.keys(fields).join(', ')}`);\n    \n    return msg;\n    \n} catch (error) {\n    node.error(\"Error preparing InfluxDB data: \" + error.message);\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 540,
+        "wires": [
+            [
+                "c7de1f48b891025f"
+            ]
+        ]
+    },
+    {
+        "id": "784286e413bd46cb",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage_V3",
+        "func": "// Convert 2 registers to float32 for Voltage V3N\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const voltageV3N = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        voltage_v3n: voltageV3N,\n        unit: \"V\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 140,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "b24be9472e599fd6",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage_V2",
+        "func": "// Convert 2 registers to float32 for Voltage V2N\nif (msg.payload && msg.payload.length >= 2) {\n    const reg1 = msg.payload[0];\n    const reg2 = msg.payload[1];\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const voltageV2N = buffer.readFloatBE(0);\n\n    msg.payload = {\n        voltage_v2n: voltageV2N,\n        unit: \"V\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 100,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "dc88d67947c5d83f",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I1",
+        "func": "// Convert 2 registers to float32 for Current I1\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const currentI1 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        current_i1: currentI1,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 220,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "91c744309f7d39e5",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I2",
+        "func": "// Convert 2 registers to float32 for Current I2\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const currentI2 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        current_i2: currentI2,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 260,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "4b5f2b21e1613942",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I3",
+        "func": "// Convert 2 registers to float32 for Current I3\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const currentI3 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        current_i3: currentI3,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 300,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "5aba1aa67f0a6dd8",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": " kW1",
+        "func": "// Convert 2 registers to float32 for kW1\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kW1 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kw1: kW1,\n        unit: \"kW\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "29da1164dd29b455",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA3",
+        "func": "// Convert 2 registers to float32 for kVA3\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kVA3 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kva3: kVA3,\n        unit: \"kVA\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 540,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "e5a510f81bbcd219",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kW3",
+        "func": "// Convert 2 registers to float32 for kW3\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kW3 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kw3: kW3,\n        unit: \"kW\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 420,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "dfbbe8fcb7c3859f",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA2",
+        "func": "// Convert 2 registers to float32 for kVA2\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kVA2 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kva2: kVA2,\n        unit: \"kVA\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 500,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "b24bb63986df4d7f",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I1 Demand",
+        "func": "// Convert 2 registers to float32 for MAX I1 Demand\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const maxI1Demand = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        max_i1_demand: maxI1Demand,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 940,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "b2b264932d754a07",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total net kVAh",
+        "func": "// Convert 2 registers to float32 for Total net kVAh\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const totalNetKVAh = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        total_net_kvah: totalNetKVAh,\n        unit: \"kVAh\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 900,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "df0282fc5a3b739d",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total net kWh",
+        "func": "// Convert 2 registers to float32 for Total net kWh\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const totalNetKWh = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        total_net_kwh: totalNetKWh,\n        unit: \"kWh\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 860,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "672cf930b80a0f52",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Frequency",
+        "func": "// Convert 2 registers to float32 for Frequency\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const frequency = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        frequency: frequency,\n        unit: \"Hz\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 820,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "d778a732c1c033ed",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF3",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const PowerFactor = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        power_factor3: PowerFactor,\n        unit: \"\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 740,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "3ee46c5c9c049150",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF2",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const PowerFactor = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        power_factor2: PowerFactor,\n        unit: \"\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 700,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "bedb8201de0095c0",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF1",
+        "func": "// Convert 2 registers to float32\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n    \n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    \n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    \n    // Read as big-endian float32\n    const power_factor1 = buffer.readFloatBE(0);\n    \n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        power_factor1: power_factor1,\n        unit: \"\",\n        timestamp: new Date().toISOString()\n    };\n    \n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 660,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "e6ed726e10bc749c",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total KVA",
+        "func": "// Convert 2 registers to float32 for Total KVA\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const totalKVA = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        total_kva: totalKVA,\n        unit: \"kVA\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 620,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "5d7bcba06956688c",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total KW",
+        "func": "// Convert 2 registers to float32 for Total KW\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const totalKW = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        total_kw: totalKW,\n        unit: \"kW\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 580,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "f4e26dbc8405b617",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA1",
+        "func": "// Convert 2 registers to float32 for kVA1\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kVA1 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kva1: kVA1,\n        unit: \"kVA\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 460,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "cf2720b2ac7c3c79",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": " kW2",
+        "func": "// Convert 2 registers to float32 for kW2\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const kW2 = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        kw2: kW2,\n        unit: \"kW\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 380,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "48a445f96227c77f",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I2 Demand",
+        "func": "// Convert 2 registers to float32 for MAX I2 Demand\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const maxI2Demand = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        max_i2_demand: maxI2Demand,\n        unit: \"A\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 980,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "b50614edebd656e3",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I3 Demand",
+        "func": "// Convert 2 registers to float32 for MAX I3 Demand\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const maxI3Demand = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        max_i3_demand: maxI3Demand,\n        unit: \"A\", // Assuming Amperes, adjust if different\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 1020,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "c7de1f48b891025f",
+        "type": "influxdb out",
+        "z": "aebffb594301406b",
+        "d": true,
+        "influxdb": "154b133124f6262e",
+        "name": "SLT 2nd floor canteen",
+        "measurement": "SLT 2nd floor_canteen",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "SLT",
+        "bucket": "SLT Canteens",
+        "x": 1300,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "9463af1c1e0eb912",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage_V1",
+        "func": "// Convert 2 registers to float32 for Voltage V1N\nif (msg.payload && msg.payload.length >= 2) {\n    const reg1 = msg.payload[0];\n    const reg2 = msg.payload[1];\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const voltageV1N = buffer.readFloatBE(0);\n\n    msg.payload = {\n        voltage_v1n: voltageV1N,\n        unit: \"V\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 60,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "582dba74132f76ef",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Average Voltage LN",
+        "func": "// Convert 2 registers to float32 for Average Voltage LN\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const averageVoltageLN = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        average_voltage_ln: averageVoltageLN,\n        unit: \"V\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "d3a605fae35eb941",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Average PF",
+        "func": "// Convert 2 registers to float32 for Average PF\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const averagePF = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        average_pf: averagePF,\n        unit: \"\",\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 780,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "42694f947a00ba75",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX Avg. I Demand",
+        "func": "// Convert 2 registers to float32 for MAX Avg. I Demand\n// Assuming big-endian byte order (most common)\n\nif (msg.payload && msg.payload.length >= 2) {\n    // Get the two 16-bit register values\n    const reg1 = msg.payload[0];  // High register\n    const reg2 = msg.payload[1];  // Low register\n\n    // Create a buffer for the float conversion\n    const buffer = Buffer.alloc(4);\n\n    // Write as big-endian 16-bit values\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n\n    // Read as big-endian float32\n    const maxAvgIDemand = buffer.readFloatBE(0);\n\n    msg.payload = {\n        raw_registers: [reg1, reg2],\n        max_avg_i_demand: maxAvgIDemand,\n        unit: \"A\", // Amperes for current demand\n        timestamp: new Date().toISOString()\n    };\n\n    return msg;\n} else {\n    node.error(\"Invalid payload received\");\n    return null;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 1060,
+        "wires": [
+            [
+                "b04caa2dc3a2ce82"
+            ]
+        ]
+    },
+    {
+        "id": "b852f15ae894b3e0",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage V1N",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "1",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 60,
+        "wires": [
+            [
+                "9463af1c1e0eb912"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "26aba37cc35b7117",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I2 Demand",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "695",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 320,
+        "y": 980,
+        "wires": [
+            [
+                "48a445f96227c77f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "97af40be37414d7f",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I1 Demand",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "693",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 320,
+        "y": 940,
+        "wires": [
+            [
+                "b24bb63986df4d7f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "69f29bac441d3067",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total net kVAh",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "61",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 900,
+        "wires": [
+            [
+                "b2b264932d754a07"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "1a59422c97c1b4db",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total net kWh",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "59",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 860,
+        "wires": [
+            [
+                "df0282fc5a3b739d"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9176d68dda8b3263",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Frequency",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "57",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 820,
+        "wires": [
+            [
+                "672cf930b80a0f52"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "ecbc7e9d99a8ec13",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Average PF",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "55",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 780,
+        "wires": [
+            [
+                "d3a605fae35eb941"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f526d311cfe1ccc2",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF3",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "53",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 740,
+        "wires": [
+            [
+                "d778a732c1c033ed"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9e8ce6b44cf218bc",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF2",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "51",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 700,
+        "wires": [
+            [
+                "3ee46c5c9c049150"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "05d43947b74f7983",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "PF1",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "49",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 660,
+        "wires": [
+            [
+                "bedb8201de0095c0"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "61a0c01f8e545b72",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total KVA",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "45",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 620,
+        "wires": [
+            [
+                "e6ed726e10bc749c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "feef48c1d1312a1e",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Total KW",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "43",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 580,
+        "wires": [
+            [
+                "5d7bcba06956688c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a02fb9ad1288007a",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA3",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "35",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 540,
+        "wires": [
+            [
+                "29da1164dd29b455"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "fe25eae7a5748253",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA2",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "33",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 500,
+        "wires": [
+            [
+                "dfbbe8fcb7c3859f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "06f4bd5efc8147aa",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kVA1",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "31",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 460,
+        "wires": [
+            [
+                "f4e26dbc8405b617"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "fd1713f0a44d7a41",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "kW3",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "29",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 420,
+        "wires": [
+            [
+                "e5a510f81bbcd219"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "d01a41d8ebbe16df",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": " kW2",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "27",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 380,
+        "wires": [
+            [
+                "cf2720b2ac7c3c79"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "5185857136c3037c",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": " kW1",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "25",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 290,
+        "y": 340,
+        "wires": [
+            [
+                "5aba1aa67f0a6dd8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e532813d4833572c",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I3",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "21",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 300,
+        "wires": [
+            [
+                "4b5f2b21e1613942"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "9039cbf0dc19a5a4",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I2",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "19",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 260,
+        "wires": [
+            [
+                "91c744309f7d39e5"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "b656ca45ad5a5e7e",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Current I1",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "17",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 300,
+        "y": 220,
+        "wires": [
+            [
+                "dc88d67947c5d83f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f637afcd0f109839",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Average Voltage LN",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "7",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 330,
+        "y": 180,
+        "wires": [
+            [
+                "582dba74132f76ef"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "5fdde6f15695736f",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage V3N",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "5",
+        "quantity": "3",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 140,
+        "wires": [
+            [
+                "784286e413bd46cb"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "7a01ed2c86d3e654",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "Voltage V2N",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "3",
+        "quantity": "2",
+        "rate": "1",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 310,
+        "y": 100,
+        "wires": [
+            [
+                "b24be9472e599fd6"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "10fc84e426d51d89",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX Avg. I Demand",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "699",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 330,
+        "y": 1060,
+        "wires": [
+            [
+                "42694f947a00ba75"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "977e38cc119d13ac",
+        "type": "modbus-read",
+        "z": "aebffb594301406b",
+        "d": true,
+        "name": "MAX I3 Demand",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "4",
+        "dataType": "InputRegister",
+        "adr": "697",
+        "quantity": "2",
+        "rate": "5",
+        "rateUnit": "s",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 320,
+        "y": 1020,
+        "wires": [
+            [
+                "b50614edebd656e3"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "c28cf35ff618855f",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "name": "Prepare InfluxDB Data",
+        "func": "// Prepare data for InfluxDB - Handle specific required fields only\ntry {\n    const data = msg.payload;\n    \n    // Validate input data\n    if (!data || typeof data !== 'object') {\n        node.error(\"Invalid payload - expected object\");\n        return null;\n    }\n    \n    const timestamp = new Date().toISOString();\n\n    // Function to ensure value is a valid number\n    function ensureNumber(value) {\n        if (value === null || value === undefined || value === \"\") return null;\n        if (typeof value === 'number') {\n            return isNaN(value) || !isFinite(value) ? null : Number(value.toFixed(3));\n        }\n        if (typeof value === 'string') {\n            const cleaned = value.replace(/[^0-9.-]/g, '').trim();\n            if (cleaned === '' || cleaned === '-' || cleaned === '.') return null;\n            const num = parseFloat(cleaned);\n            return isNaN(num) || !isFinite(num) ? null : Number(num.toFixed(3));\n        }\n        return null;\n    }\n\n    // Create fields object for specific required values only\n    const fields = {};\n    \n    // Required fields mapping based on your specification\n    const requiredFields = {\n        // Voltage readings\n        'voltage_v1n': data.voltage_v1n,\n        'voltage_v2n': data.voltage_v2n, \n        'voltage_v3n': data.voltage_v3n,\n        'average_voltage_ln': data.average_voltage_ln,\n        \n        // Current readings\n        'current_i1': data.current_i1,\n        'current_i2': data.current_i2,\n        'current_i3': data.current_i3,\n        'average_current': data.average_current,\n        \n        // Power readings (kW)\n        'kw1': data.kw1,\n        'kw2': data.kw2,\n        'kw3': data.kw3,\n        'total_kw': data.total_kw,\n        \n        // Apparent power (kVA)\n        'kva1': data.kva1,\n        'kva2': data.kva2,\n        'kva3': data.kva3,\n        'total_kva': data.total_kva,\n        \n        // Power factor\n        'pf1': data.pf1 || data.power_factor1,\n        'pf2': data.pf2 || data.power_factor2,\n        'pf3': data.pf3 || data.power_factor3,\n        'average_pf': data.average_pf || data.average_power_factor,\n        \n        // Frequency\n        'frequency': data.frequency,\n        \n        // Energy readings\n        'total_net_kwh': data.total_net_kwh,\n        'total_net_kvah': data.total_net_kvah,\n        \n        // Maximum demand readings\n        'max_i1_demand': data.max_i1_demand,\n        'max_i2_demand': data.max_i2_demand,\n        'max_i3_demand': data.max_i3_demand,\n        'max_avg_i_demand': data.max_avg_i_demand\n    };\n    \n    // Process only the required fields\n    for (const [fieldName, value] of Object.entries(requiredFields)) {\n        if (value !== undefined && value !== null) {\n            const processedValue = ensureNumber(value);\n            if (processedValue !== null) {\n                fields[fieldName] = processedValue;\n            }\n        }\n    }\n    \n    // Check if we have at least one valid field\n    if (Object.keys(fields).length === 0) {\n        node.warn(\"No valid required fields found. Available data fields: \" + \n                  Object.keys(data).filter(key => !['raw_registers', 'unit', 'timestamp'].includes(key)).join(', '));\n        return null;\n    }\n\n    // Create InfluxDB format with only required fields\n    msg.payload = {\n        ...fields,\n        device: \"SLT 2nd floor\",\n        location: \"Canteen\"\n    };\n\n    node.log(`Sending ${Object.keys(fields).length} required parameters to InfluxDB: ${Object.keys(fields).join(', ')}`);\n    \n    return msg;\n    \n} catch (error) {\n    node.error(\"Error preparing InfluxDB data: \" + error.message);\n    return null;\n}",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 1340,
+        "wires": [
+            [
+                "491fd4a5ee61edf6",
+                "00ce04c525619e40"
+            ]
+        ]
+    },
+    {
+        "id": "491fd4a5ee61edf6",
+        "type": "influxdb out",
+        "z": "aebffb594301406b",
+        "influxdb": "154b133124f6262e",
+        "name": "SLT 2nd floor canteen",
+        "measurement": "SLT 2nd floor_canteen",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "SLT",
+        "bucket": "SLT Canteens",
+        "x": 1420,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "04e23ce29c6f3c84",
+        "type": "inject",
+        "z": "aebffb594301406b",
+        "name": "Start Canteen Every 5s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "{}",
+        "payloadType": "json",
+        "x": 160,
+        "y": 1340,
+        "wires": [
+            [
+                "abdd2170a6960ce6"
+            ]
+        ]
+    },
+    {
+        "id": "abdd2170a6960ce6",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "name": "Start 2nd Floor Sequence",
+        "func": "// START sequential read for SLT 2nd Floor Canteen\n// Initialize accumulator in flow context\nflow.set('SLT_2nd_Floor_blocks', {});\n\n// Send first request: block_a (Address 1, qty 62)\nmsg.payload = {\n    value:    0,\n    unitid:   4,\n    fc:       4,\n    address:  1,\n    quantity: 62\n};\nmsg.topic = 'block_a';\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 1340,
+        "wires": [
+            [
+                "264a4a40c920433f"
+            ]
+        ]
+    },
+    {
+        "id": "264a4a40c920433f",
+        "type": "modbus-flex-getter",
+        "z": "aebffb594301406b",
+        "name": "Flex Getter SLT 2nd Floor",
+        "showStatusActivities": false,
+        "showErrors": true,
+        "showWarnings": true,
+        "logIOActivities": false,
+        "server": "42c13a4a17536471",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": true,
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "x": 650,
+        "y": 1340,
+        "wires": [
+            [
+                "f2028e668cd738b4"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f2028e668cd738b4",
+        "type": "function",
+        "z": "aebffb594301406b",
+        "name": "Parse & Next SLT 2nd Floor",
+        "func": "// Sequential parser for SLT 2nd Floor Canteen\nconst topic = msg.topic;\nconst regs = msg.payload;\n\nfunction readFloat(regs, startIndex) {\n    if (!regs || regs.length < startIndex + 2) return null;\n    const reg1 = regs[startIndex];\n    const reg2 = regs[startIndex + 1];\n    const buffer = Buffer.alloc(4);\n    buffer.writeUInt16BE(reg1, 0);\n    buffer.writeUInt16BE(reg2, 2);\n    return buffer.readFloatBE(0);\n}\n\n// Retrieve accumulator\nlet blocks = flow.get('SLT_2nd_Floor_blocks') || {};\n\nif (!Array.isArray(regs)) {\n    node.warn('SLT 2nd Floor bad response on ' + topic + ': ' + JSON.stringify(regs));\n} else {\n    if (topic === 'block_a') {\n        if (regs.length >= 62) {\n            blocks.voltage_v1n = readFloat(regs, 0);\n            blocks.voltage_v2n = readFloat(regs, 2);\n            blocks.voltage_v3n = readFloat(regs, 4);\n            blocks.average_voltage_ln = readFloat(regs, 6);\n\n            blocks.current_i1 = readFloat(regs, 16);\n            blocks.current_i2 = readFloat(regs, 18);\n            blocks.current_i3 = readFloat(regs, 20);\n\n            if (blocks.current_i1 !== null && blocks.current_i2 !== null && blocks.current_i3 !== null) {\n                blocks.average_current = (blocks.current_i1 + blocks.current_i2 + blocks.current_i3) / 3;\n            } else {\n                blocks.average_current = null;\n            }\n\n            blocks.kw1 = readFloat(regs, 24);\n            blocks.kw2 = readFloat(regs, 26);\n            blocks.kw3 = readFloat(regs, 28);\n\n            blocks.kva1 = readFloat(regs, 30);\n            blocks.kva2 = readFloat(regs, 32);\n            blocks.kva3 = readFloat(regs, 34);\n\n            blocks.total_kw = readFloat(regs, 42);\n            blocks.total_kva = readFloat(regs, 44);\n\n            blocks.pf1 = blocks.power_factor1 = readFloat(regs, 48);\n            blocks.pf2 = blocks.power_factor2 = readFloat(regs, 50);\n            blocks.pf3 = blocks.power_factor3 = readFloat(regs, 52);\n            blocks.average_pf = blocks.average_power_factor = readFloat(regs, 54);\n\n            blocks.frequency = readFloat(regs, 56);\n\n            blocks.total_net_kwh = readFloat(regs, 58);\n            blocks.total_net_kvah = readFloat(regs, 60);\n        } else {\n            node.warn('SLT 2nd Floor block_a short: ' + regs.length);\n        }\n    } else if (topic === 'block_b') {\n        if (regs.length >= 8) {\n            blocks.max_i1_demand = readFloat(regs, 0);\n            blocks.max_i2_demand = readFloat(regs, 2);\n            blocks.max_i3_demand = readFloat(regs, 4);\n            blocks.max_avg_i_demand = readFloat(regs, 6);\n        } else {\n            node.warn('SLT 2nd Floor block_b short: ' + regs.length);\n        }\n    }\n}\n\n// Save updated accumulator\nflow.set('SLT_2nd_Floor_blocks', blocks);\n\n// Decide next action - send next request or finish\nconst sequence = {\n    'block_a': { address: 693, quantity: 8, next: 'block_b' },\n    'block_b': null\n};\n\nconst next = sequence[topic];\n\nif (next === null) {\n    // Done - send combined payload\n    msg.topic = 'done';\n    msg.payload = blocks;\n    flow.set('SLT_2nd_Floor_blocks', {});\n    return [null, msg];\n} else if (next) {\n    var nextMsg = {\n        payload: {\n            value:    0,\n            unitid:   4,\n            fc:       4,\n            address:  next.address,\n            quantity: next.quantity\n        },\n        topic: next.next\n    };\n    setTimeout(function() {\n        node.send([nextMsg, null]);\n    }, 500);\n    return null;\n} else {\n    node.warn('Unknown topic: ' + topic);\n    return [null, null];\n}",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 1340,
+        "wires": [
+            [
+                "264a4a40c920433f"
+            ],
+            [
+                "c28cf35ff618855f"
+            ]
+        ]
+    },
+    {
+        "id": "00ce04c525619e40",
+        "type": "debug",
+        "z": "aebffb594301406b",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1360,
+        "y": 1420,
+        "wires": []
+    },
+    {
+        "id": "154b133124f6262e",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "123",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://124.43.179.232:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "42c13a4a17536471",
+        "type": "modbus-client",
+        "name": "SLT 2nd Floor Canteen",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "192.168.1.200",
+        "tcpPort": 502,
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": 9600,
+        "serialDatabits": 8,
+        "serialStopbits": 1,
+        "serialParity": "none",
+        "serialConnectionDelay": 100,
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": 4,
+        "commandDelay": 1,
+        "clientTimeout": 1000,
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": 2000,
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "8110ca5fe0553de7",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-influxdb": "0.7.0",
+            "node-red-contrib-modbus": "5.44.0"
+        }
+    }
+]

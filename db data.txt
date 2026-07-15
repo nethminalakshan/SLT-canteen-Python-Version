@@ -1,0 +1,5 @@
+token:jsEgn9UpR2yTjXaJpSNdwOEow1rnzqMDXPlBuriQaFiq9Mj9X0UIBgu0RN1_kmQMnrCvDojdgM3TYboVSo0D-Q==
+org:SLT
+IP_ADDRESS:124.43.179.232
+port:8086
+bucket:SLT Canteens
