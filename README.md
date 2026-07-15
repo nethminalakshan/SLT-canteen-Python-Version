@@ -34,8 +34,9 @@ Each collector runs as an independent process. The **master launcher** supervise
 | Rajabojun Canteen | `slt_rajabojun_canteen.py` | 192.168.1.201 | 1 |
 | 1st Floor Canteen | `slt_1st_floor_canteen.py` | 192.168.1.200 | 3 |
 | 2nd Floor Canteen | `slt_2nd_floor_canteen.py` | 192.168.1.200 | 4 |
+| **RPi Board** | `rpi_temperature_monitor.py` | *(Linux thermal zone)* | — |
 
-All four scripts share a **single shared config file** (`db data.txt`) in the project root for InfluxDB credentials.
+All scripts share a **single shared config file** (`db data.txt`) in the project root for InfluxDB credentials.
 
 ---
 
@@ -44,7 +45,7 @@ All four scripts share a **single shared config file** (`db data.txt`) in the pr
 ```
 SLT canteen Python Version/
 |
-+-- master_launcher.py                   # Central supervisor — starts & auto-restarts all 4 scripts
++-- master_launcher.py                   # Central supervisor — starts & auto-restarts all scripts
 +-- db data.txt                          # Shared InfluxDB connection credentials (token, org, IP, bucket)
 |
 +-- SLT Fruit Juice Bar/
@@ -60,8 +61,12 @@ SLT canteen Python Version/
 |   +-- README.md
 |
 +-- SLT 2nd Floor Canteen/
-    +-- slt_2nd_floor_canteen.py         # 2nd Floor Canteen Modbus collector
-    +-- README.md
+|   +-- slt_2nd_floor_canteen.py         # 2nd Floor Canteen Modbus collector
+|   +-- README.md
+|
++-- RPi Temperature Monitor/
+    +-- rpi_temperature_monitor.py       # Raspberry Pi SoC temperature → InfluxDB monitor
+    +-- README.md                        # Script-specific documentation
 ```
 
 ---
@@ -167,6 +172,21 @@ SLT canteen Python Version/
 
 ---
 
+### 5. RPi Temperature Monitor
+
+| Property | Value |
+|---|---|
+| **File** | `RPi Temperature Monitor/rpi_temperature_monitor.py` |
+| **Data Source** | `/sys/class/thermal/thermal_zone0/temp` (Linux kernel interface) |
+| **Poll Interval** | 10 seconds |
+| **InfluxDB Measurement** | `RPi_Temperature` |
+| **Dependencies** | `influxdb-client` only (no Modbus library needed) |
+| **Docs** | `RPi Temperature Monitor/README.md` |
+
+**Metrics collected:** `temperature_c` (°C), `temperature_f` (°F), `status` (OK / WARN / CRIT).
+
+---
+
 ## Master Launcher
 
 **File:** `master_launcher.py`
@@ -197,6 +217,7 @@ The launcher scans subdirectories automatically. If a folder has exactly one `.p
 | `SLT Rajabojun Canteen` | `[RajabojunCanteen]` |
 | `SLT 1st Floor Canteen` | `[FirstFloorCanteen]` |
 | `SLT 2nd Floor Canteen` | `[SecondFloorCanteen]` |
+| `RPi Temperature Monitor` | `[RPiTemperature]` |
 
 ---
 
@@ -322,15 +343,16 @@ Each script produces a structured, ANSI colour-coded display for every polling c
 
 All measurements are written to the **`SLT Canteens`** bucket under the **`SLT`** organisation.
 
-| Collector | Measurement Name |
-|---|---|
-| Fruit Juice Bar | `FruitJuiceBar_Power` |
-| Rajabojun Canteen | `RajabojunCanteen_Power` |
-| 1st Floor Canteen | `FirstFloorCanteen_Power` |
-| 2nd Floor Canteen | `SecondFloorCanteen_Power` |
+| Collector | Measurement Name | Fields |
+|---|---|---|
+| Fruit Juice Bar | `FruitJuiceBar_Power` | Power, energy, voltage, current, PF, frequency |
+| Rajabojun Canteen | `RajabojunCanteen_Power` | Power, energy, voltage, current, PF, frequency |
+| 1st Floor Canteen | `FirstFloorCanteen_Power` | Power, energy, voltage, current, PF, frequency |
+| 2nd Floor Canteen | `SecondFloorCanteen_Power` | Power, energy, voltage, current, PF, frequency |
+| **RPi Temperature** | `RPi_Temperature` | `temperature_c`, `temperature_f`, `status` |
 
-Each data point is timestamped at the moment of the successful Modbus register read.
-Values are stored as 64-bit floats, rounded to 3 decimal places.
+Each data point is timestamped at the moment of the successful read.
+Numeric values are stored as 64-bit floats, rounded to 3 decimal places.
 
 ---
 
